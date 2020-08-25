@@ -1,0 +1,13 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=pt1_bliphi
+01.wav=pt1_bliplo
+02.wav=pt1_sd
+03.wav=Casiopt1_140bpm_001
+04.wav=Casiopt1_140bpm_002
+05.wav=Casiopt1_140bpm_003
+06.wav=Casiopt1_140bpm_004
+07.wav=Casiopt1_140bpm_005
+
+

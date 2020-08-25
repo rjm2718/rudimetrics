@@ -1,0 +1,21 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=mt18_bd
+01.wav=mt18_bd_soft
+02.wav=mt18_hhc
+03.wav=mt18_hhc_soft
+04.wav=mt18_hho
+05.wav=mt18_hho_soft
+06.wav=mt18_sd
+07.wav=mt18_tomhi
+08.wav=mt18_tomhi_soft
+09.wav=mt18_tomlo
+10.wav=mt18_tomlo_soft
+11.wav=casiomt-18_140bpm_001
+12.wav=casiomt-18_140bpm_002
+13.wav=casiomt-18_140bpm_003
+14.wav=casiomt-18_140bpm_004
+15.wav=casiomt-18_140bpm_005
+
+

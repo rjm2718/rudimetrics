@@ -1,0 +1,22 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=mt500_bd
+01.wav=mt500_bell
+02.wav=mt500_bnghi
+03.wav=mt500_bnglo
+04.wav=mt500_clap
+05.wav=mt500_hhc
+06.wav=mt500_hho
+07.wav=mt500_rim
+08.wav=mt500_sd
+09.wav=mt500_tomhi
+10.wav=mt500_tomlo
+11.wav=mt800_cym
+12.wav=CasioMT500_140bpm_001
+13.wav=CasioMT500_140bpm_002
+14.wav=CasioMT500_140bpm_003
+15.wav=CasioMT500_140bpm_004
+16.wav=CasioMT500_140bpm_005
+
+

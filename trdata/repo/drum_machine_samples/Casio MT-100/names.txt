@@ -1,0 +1,16 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=mt100_bd
+01.wav=mt100_hhc
+02.wav=mt100_hho
+03.wav=mt100_sd
+04.wav=mt100_tomhi
+05.wav=mt100_tomlo
+06.wav=CasioMT100_140bpm_001
+07.wav=CasioMT100_140bpm_002
+08.wav=CasioMT100_140bpm_003
+09.wav=CasioMT100_140bpm_004
+10.wav=CasioMT100_140bpm_005
+
+

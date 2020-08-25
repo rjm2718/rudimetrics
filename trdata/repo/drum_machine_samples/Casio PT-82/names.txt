@@ -1,0 +1,17 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=pt82_bdhi
+01.wav=pt82_bdlo
+02.wav=pt82_hhc
+03.wav=pt82_sdhi
+04.wav=pt82_sdlo
+05.wav=pt82_tomhi
+06.wav=pt82_tomlo
+07.wav=Casiopt82_140bpm_001
+08.wav=Casiopt82_140bpm_002
+09.wav=Casiopt82_140bpm_003
+10.wav=Casiopt82_140bpm_004
+11.wav=Casiopt82_140bpm_005
+
+

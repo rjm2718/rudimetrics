@@ -1,0 +1,22 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=rapman band-hit
+01.wav=rapman brass-hit
+02.wav=rapman cowbell
+03.wav=rapman hihat1
+04.wav=rapman hihat2
+05.wav=rapman kick
+06.wav=rapman orch-hit
+07.wav=rapman scratch1
+08.wav=rapman scratch2
+09.wav=rapman snare
+10.wav=rapman vocoder-hit1
+11.wav=rapman vocoder-hit2
+12.wav=casio_rapman_140bpm_001
+13.wav=casio_rapman_140bpm_002
+14.wav=casio_rapman_140bpm_003
+15.wav=casio_rapman_140bpm_004
+16.wav=casio_rapman_140bpm_005
+
+

@@ -1,0 +1,28 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=Bdrum1
+01.wav=Bdrum2
+02.wav=Bdrum3
+03.wav=Bdrum4
+04.wav=Bdrum7
+05.wav=Hhclose1
+06.wav=Hhclose3
+07.wav=Hhopen1
+08.wav=Hhopen4
+09.wav=Snare1
+10.wav=Snare12
+11.wav=Snare13
+12.wav=Snare2
+13.wav=Snare9
+14.wav=Tom1
+15.wav=Tom2
+16.wav=Woodbl1
+17.wav=Woodbl2
+18.wav=korgminipops_140bpm_loop001
+19.wav=korgminipops_140bpm_loop002
+20.wav=korgminipops_140bpm_loop003
+21.wav=korgminipops_140bpm_loop004
+22.wav=korgminipops_140bpm_loop005
+
+

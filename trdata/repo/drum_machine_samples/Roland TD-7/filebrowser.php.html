@@ -1,0 +1,615 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html dir="ltr">
+<head>
+
+<script language="JavaScript" type="text/JavaScript">
+<!--
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+//-->
+</script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+
+<link rel="top" href="index.php" title="" />
+<link rel="search" href="search.php" title="" />
+<link rel="help" href="faq.php" title="" />
+<link rel="author" href="memberlist.php" title="" />
+
+<title>SampleSwap - </title>
+<!-- link rel="stylesheet" href="templates/ontology/ontology.css" type="text/css" -->
+<style type="text/css">
+<!--
+/*
+  The original ontology Theme for phpBB version 2+
+  Created by subBlue design
+  http://www.subBlue.com
+
+  NOTE: These CSS definitions are stored within the main page body so that you can use the phpBB2
+  theme administration centre. When you have finalised your style you could cut the final CSS code
+  and place it in an external file, deleting this section to save bandwidth.
+*/
+
+/* General page style. The scroll bar colours only visible in IE5.5+ */
+body {
+	background-color: #E5E5E5;
+	scrollbar-face-color: #DEE3E7;
+	scrollbar-highlight-color: #FFFFFF;
+	scrollbar-shadow-color: #DEE3E7;
+	scrollbar-3dlight-color: #D1D7DC;
+	scrollbar-arrow-color:  #006699;
+	scrollbar-track-color: #EFEFEF;
+	scrollbar-darkshadow-color: #98AAB1;
+}
+
+/* General font families for common tags */
+font,th,td,p { font-family: Verdana, Arial, Helvetica }
+a:link,a:active,a:visited { color : #006699; }
+a:hover		{ text-decoration: underline; color : #DD6900; }
+hr	{ height: 0px; border: solid #D1D7DC 0px; border-top-width: 1px;}
+
+/* This is the border line & background colour round the entire page */
+.bodyline	{ background-color: #FFFFFF; border: 1px #98AAB1 solid; }
+
+/* This is the outline round the main forum tables */
+.forumline	{ background-color: #FFFFFF; border: 2px #D1D8DE solid; }
+
+/* Main table cell colours and backgrounds */
+td.row1	{ background-color: #EFEFEF; }
+td.row2	{ background-color: #DEE3E7; }
+td.row3	{ background-color: #D1D7DC; }
+
+/*
+  This is for the table cell above the Topics, Post & Last posts on the index.php page
+  By default this is the fading out gradiated silver background.
+  However, you could replace this with a bitmap specific for each forum
+*/
+td.rowpic {
+		background-color: #FFFFFF;
+		background-image: url(templates/ontology/images/cellpic2.jpg);
+		background-repeat: repeat-y;
+}
+
+/* Header cells - the blue and silver gradient backgrounds */
+th	{
+	color: #333355; font-size: 11px; font-weight : bold;
+	background-color: #006699; height: 25px;
+	background-image: url(templates/ontology/images/cellpic3.gif);
+}
+
+td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {
+			background-image: url(templates/ontology/images/cellpic1.gif);
+			background-color:#D1D7DC; border: #FFFFFF; border-style: solid; height: 28px;
+}
+
+/*
+  Setting additional nice inner borders for the main table cells.
+  The names indicate which sides the border will be on.
+  Don't worry if you don't understand this, just ignore it :-)
+*/
+td.cat,td.catHead,td.catBottom {
+	height: 29px;
+	border-width: 0px 0px 0px 0px;
+}
+th.thHead,th.thSides,th.thTop,th.thLeft,th.thRight,th.thBottom,th.thCornerL,th.thCornerR {
+	font-weight: bold; border: #FFFFFF; border-style: solid; height: 28px;
+}
+td.row3Right,td.spaceRow {
+	background-color: #D1D7DC; border: #FFFFFF; border-style: solid;
+}
+
+th.thHead,td.catHead { font-size: 12px; border-width: 1px 1px 0px 1px; }
+th.thSides,td.catSides,td.spaceRow	 { border-width: 0px 1px 0px 1px; }
+th.thRight,td.catRight,td.row3Right	 { border-width: 0px 1px 0px 0px; }
+th.thLeft,td.catLeft	  { border-width: 0px 0px 0px 1px; }
+th.thBottom,td.catBottom  { border-width: 0px 1px 1px 1px; }
+th.thTop	 { border-width: 1px 0px 0px 0px; }
+th.thCornerL { border-width: 1px 0px 0px 1px; }
+th.thCornerR { border-width: 1px 1px 0px 0px; }
+
+/* The largest text used in the index page title and toptic title etc. */
+.maintitle	{
+	font-weight: bold; font-size: 22px; font-family: "Trebuchet MS, Arial, Helvetica",Verdana, Arial, Helvetica;
+	text-decoration: none; line-height : 120%; color : #000000;
+}
+
+/* General text */
+.gen { font-size : 12px; }
+.genmed { font-size : 11px; }
+.gensmall { font-size : 10px; }
+.gen,.genmed,.gensmall { color : #000000; }
+a.gen,a.genmed,a.gensmall { color: #006699; text-decoration: none; }
+a.gen:hover,a.genmed:hover,a.gensmall:hover	{ color: #DD6900; text-decoration: underline; }
+
+/* The register, login, search etc links at the top of the page */
+.mainmenu		{ font-size : 11px; color : #000000 }
+a.mainmenu		{ text-decoration: none; color : #006699;  }
+a.mainmenu:hover{ text-decoration: underline; color : #DD6900; }
+
+/* Forum category titles */
+.cattitle		{ font-weight: bold; font-size: 12px ; letter-spacing: 1px; color : #006699}
+a.cattitle		{ text-decoration: none; color : #006699; }
+a.cattitle:hover{ text-decoration: underline; }
+
+/* Forum title: Text and link to the forums used in: index.php */
+.forumlink		{ font-weight: bold; font-size: 12px; color : #006699; }
+a.forumlink 	{ text-decoration: none; color : #006699; }
+a.forumlink:hover{ text-decoration: underline; color : #DD6900; }
+
+/* Used for the navigation text, (Page 1,2,3 etc) and the navigation bar when in a forum */
+.nav			{ font-weight: bold; font-size: 11px; color : #000000;}
+a.nav			{ text-decoration: none; color : #006699; }
+a.nav:hover		{ text-decoration: underline; }
+
+/* titles for the topics: could specify viewed link colour too */
+.topictitle,h1,h2	{ font-weight: bold; font-size: 11px; color : #000000; }
+a.topictitle:link   { text-decoration: none; color : #006699; }
+a.topictitle:visited { text-decoration: none; color : #5493B4; }
+a.topictitle:hover	{ text-decoration: underline; color : #DD6900; }
+
+/* Name of poster in viewmsg.php and viewtopic.php and other places */
+.name			{ font-size : 11px; color : #000000;}
+
+/* Location, number of posts, post date etc */
+.postdetails		{ font-size : 10px; color : #000000; }
+
+/* The content of the posts (body of text) */
+.postbody { font-size : 12px; line-height: 18px}
+a.postlink:link	{ text-decoration: none; color : #006699 }
+a.postlink:visited { text-decoration: none; color : #5493B4; }
+a.postlink:hover { text-decoration: underline; color : #DD6900}
+
+/* Quote & Code blocks */
+.code {
+	font-family: Courier, 'Courier New', sans-serif; font-size: 11px; color: #006600;
+	background-color: #FAFAFA; border: #D1D7DC; border-style: solid;
+	border-left-width: 1px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px
+}
+
+.quote {
+	font-family: Verdana, Arial, Helvetica; font-size: 11px; color: #444444; line-height: 125%;
+	background-color: #FAFAFA; border: #D1D7DC; border-style: solid;
+	border-left-width: 1px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px
+}
+
+/* Copyright and bottom info */
+.copyright		{ font-size: 10px; font-family: Verdana, Arial, Helvetica; color: #444444; letter-spacing: -1px;}
+a.copyright		{ color: #444444; text-decoration: none;}
+a.copyright:hover { color: #000000; text-decoration: underline;}
+
+/* Form elements */
+input,textarea, select {
+	color : #000000;
+	font: normal 11px Verdana, Arial, Helvetica;
+	border-color : #000000;
+}
+
+/* The text input fields background colour */
+input.post, textarea.post, select {
+	background-color : #FFFFFF;
+}
+
+input { text-indent : 2px; }
+
+/* The buttons used for bbCode styling in message post */
+input.button {
+	background-color : #EFEFEF;
+	color : #000000;
+	font-size: 11px; font-family: Verdana, Arial, Helvetica;
+}
+
+/* The main submit button option */
+input.mainoption {
+	background-color : #FAFAFA;
+	font-weight : bold;
+}
+
+/* None-bold submit button */
+input.liteoption {
+	background-color : #FAFAFA;
+	font-weight : normal;
+}
+
+/* This is the line in the posting page which shows the rollover
+  help line. This is actually a text box, but if set to be the same
+  colour as the background no one will know ;)
+*/
+.helpline { background-color: #DEE3E7; border-style: none; }
+
+/* Import the fancy styles for IE only (NS4.x doesn't use the @import function) */
+@import url("templates/ontology/formIE.css");
+-->
+</style>
+</head>
+<body bgcolor="#E5E5E5" text="#000000" link="#006699" vlink="#5493B4" onLoad="MM_preloadImages('donate2.gif')"/>
+
+<a name="top"></a>
+
+<table width="100%" cellspacing="0" cellpadding="10" border="0" align="center">
+	<tr>
+		<td class="bodyline"><table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td><table border="0"><tr><td><a href="index.php"><img src="templates/ontology/images/logo_ontology.gif" border="0" alt="" vspace="1"/></a></td></td><td valign=bottom><span class="mainmenu"><A class="mainmenu" href="index.php">^</A></span></td></tr></table></td>
+				<td align="center" width="100%" valign="middle"><span class="maintitle">SampleSwap</span><br /><span class="gen">Audio samples and mischief for music makers & DJ's<br />&nbsp; </span>
+				<table cellspacing="0" cellpadding="2" border="0">
+					<tr>
+						<td align="center" valign="top" nowrap="nowrap"><span class="mainmenu">&nbsp;<a href="filebrowser.php" class="mainmenu"><img src="templates/ontology/images/icon_mini_register.gif" width="12" height="13" border="0" alt="Browse the Sample Library" hspace="3" />Download Audio Samples</a>&nbsp; &nbsp;<a href="index.php?c=2" class="mainmenu"><img src="templates/ontology/images/icon_mini_faq.gif" width="12" height="13" border="0" alt="" hspace="3" />Production Forum</a></span><!--<a href="faq.php" class="mainmenu"><img src="templates/ontology/images/icon_mini_faq.gif" width="12" height="13" border="0" alt="FAQ" hspace="3" />FAQ</a></span>--><span class="mainmenu">&nbsp; &nbsp;<a href="search.php" class="mainmenu"><!--<img src="templates/ontology/images/icon_mini_search.gif" width="12" height="13" border="0" alt="Search" hspace="3" />Search</a>-->&nbsp;<a href="memberlist.php" class="mainmenu"><img src="templates/ontology/images/icon_mini_members.gif" width="12" height="13" border="0" alt="Memberlist" hspace="3" />Member List</a>&nbsp; &nbsp;<!--<a href="groupcp.php" class="mainmenu"><img src="templates/ontology/images/icon_mini_groups.gif" width="12" height="13" border="0" alt="Usergroups" hspace="3" />Usergroups</a>-->&nbsp;
+						</td>
+					</tr>
+					<tr>
+						<td height="25" align="center" valign="top" nowrap="nowrap"><span class="mainmenu">&nbsp;<a href="profile.php?mode=editprofile" class="mainmenu"><img src="templates/ontology/images/icon_mini_profile.gif" width="12" height="13" border="0" alt="View / Edit Your Profile" hspace="3" />Your Profile</a>&nbsp; &nbsp;<a href="privmsg.php?folder=inbox" class="mainmenu"><img src="templates/ontology/images/icon_mini_message.gif" width="12" height="13" border="0" alt="You have no new messages" hspace="3" />You have no new messages</a>&nbsp; &nbsp;<a href="login.php?logout=true&amp;sid=f97278df6173c988e4aa2621a34b74ab" class="mainmenu"><img src="templates/ontology/images/icon_mini_login.gif" width="12" height="13" border="0" alt="Log out [ ghostman321 ]" hspace="3" />Log out [ ghostman321 ]</a>&nbsp;</span></td>
+					</tr>
+				</table></td>
+			</tr>
+		</table>
+		<br />
+
+<B><h2>You Are Here:</B> DRUM KITS/TD 7/ </h2>
+<IMG SRC="templates/ontology/images/ontology-dl-on.gif" align=right><BR><TABLE border=0 cellspacing="1" cellpadding="1"><TR><TD bgcolor="#333333"><TABLE border=0 cellspacing="0" cellpadding="2">
+<TR bgcolor="#DDDDDD">
+<TR bgcolor="#FFFFDD">
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>79&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_ROLL_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>66&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_ROLL_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>65&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_ROLL_3.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>47&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>50&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>47&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_3.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>43&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_4.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>47&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_5.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>60&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SLAP_6.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>28&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SWISH_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>25&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>BRUSH_SWISH_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>40&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CASTANETS_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>33&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CASTANETS_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>226&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CHINESE TD_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>201&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CHINESE TD_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>40&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CLAVES.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>73&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CRASH Small TD_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>283&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CRASH TD_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>199&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CRASH TD_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>201&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>CRASH TD_3.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>249&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Excellent MELODIC.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>27&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH ACOUSTIC_CLOSED_INNER.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>27&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH ACOUSTIC_CLOSED_OUTER.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>141&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH ACOUSTIC_OPEN_INNER.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>159&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH ACOUSTIC_OPEN_OUTER.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>13&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH ACOUSTIC_PEDAL_CLOSED.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>39&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH_HEAVY_CLOSED.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>74&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH_HEAVY_OPEN.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>33&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH_HEAVY_PEDAL_CLOSED.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>31&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>HH_TIP_PEDAL_CLOSED.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>0&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Icon</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>73&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>LIGHT_SHOT.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>223&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>lo vibey.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>44&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>LOG_DRUM.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>44&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>NOISE pitch Hifi_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>61&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Noizhit TD.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>76&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>ORCHESTRA_HIT.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>36&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>P400_ETHNIC_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>105&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Perc Pitch Drum.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>210&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Piatti 2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>117&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Piatti.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>48&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>PIPE.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>35&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Plink.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>38&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Q HiFi TD.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>232&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>RIDE Brush TD.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>46&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>RIDE Feather TD.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>6&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SCISSORS.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>25&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SNAPS Real.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>137&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SONAR.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>76&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SPARK metal.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>62&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SPLASH TD_1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>62&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>SPLASH TD_2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>331&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Timpani1.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#FFFFDD">
+<TD><FONT SIZE=1><A HREF="">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>191&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>Timpani2.WAV</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+<TR bgcolor="#DDDDDD">
+<TD><FONT SIZE=1><A HREF="http://www.sampleswap.org/SAMPLESWAP/DRUM KITS/TD 7/index.html">Download</A>&nbsp;&nbsp;</FONT></TD>
+<TD align=right><FONT SIZE=1>0&nbsp;KB</FONT></TD>
+<TD><FONT SIZE=1>&nbsp;&nbsp;<B>index.html</B></FONT></TD>
+<TD><FONT SIZE=1>&nbsp;</FONT></TD>
+</TR>
+</TABLE></TD></TR></TABLE>
+<font size=1><P>Happy downloading!<P></font>
+</FORM>
+
+<HR>
+<span class="copyright"> Large portions of this site are powered by <a href="http://www.phpbb.com/" target="_phpbb" class="copyright">phpBB</a> 2.0.4 &nbsp; | &nbsp; Sampleswap is an <a href="http://www.ontology.com"><b>ontology</b></a> production. </span>
+
+	</td>
+	</tr>
+</table>
+
+</body>
+</html>
+

@@ -1,0 +1,22 @@
+[ES1 banks]
+
+[ES1 samples]
+00.wav=cl_snare
+01.wav=i_hihat
+02.wav=i_ophihat
+03.wav=kick
+04.wav=l_hihat
+05.wav=l_ophihat
+06.wav=me_snare
+07.wav=op_snare
+08.wav=tom_hi
+09.wav=tom_lo
+10.wav=tom_lo1
+11.wav=tom_lo2
+12.wav=MRK_140bpm_loop001
+13.wav=MRK_140bpm_loop002
+14.wav=MRK_140bpm_loop003
+15.wav=MRK_140bpm_loop004
+16.wav=MRK_140bpm_loop005
+
+
