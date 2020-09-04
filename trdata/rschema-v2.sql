@@ -29,31 +29,15 @@ DROP TABLE IF EXISTS backgrounds;
 -- training/test examples
 CREATE TABLE samples (  -- use sqlite3 rowid instead of explicit primary key
   filepath text not null,
-  labels text not null,
-  impure boolean not null default FALSE, -- if not acoustic in origin, different effects will be applied when generating training data
+  labels text not null, -- comma separated
+  effects boolean not null default FALSE, -- apply effects or not (set to 0 for phone-mic'd acoustic samples)
   unique (filepath)
 );
 
 CREATE TABLE backgrounds (
   filepath text not null,
-  labels text not null,
-  length_sec float not null,
+  labels text not null, -- comma separated
+  effects boolean not null default FALSE, -- apply effects or not (set to 0 for phone-mic'd acoustic samples)
   unique (filepath)
 );
 
-
--- 
-
---  insert into labels values ('pd1', 'practice pad, short not-very-loud thuds');
---  insert into labels values ('pd2', 'practice pad, more percussive (or nylon tip)');
---  insert into labels values ('snr', 'snares');
---  insert into labels values ('clk', 'clicks');
---  insert into labels values ('tnc', 'tonal clicks/chirps');
---  insert into labels values ('kck', 'kick drums');
---  insert into labels values ('tml', 'tom - low');
---  insert into labels values ('tmm', 'tom - medium');
---  insert into labels values ('tmh', 'tom - high');
---  insert into labels values ('hhc', 'high-hat closed');
-
---  -- negatives
---  insert into labels values ('n_xx', '');
