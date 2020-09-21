@@ -135,3 +135,6 @@ dmypy.json
 *.iws
 *.ipr
 *.ids
+
+
+/trdata/repo/
