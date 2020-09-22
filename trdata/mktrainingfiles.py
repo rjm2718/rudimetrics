@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import math
 import random
 import traceback
 import os.path
@@ -30,7 +31,7 @@ class Sample:
     def __init__(self, fn, data, labels=[], apply_effects=False):
         self.fn = fn
         self.data = data
-        self.labels = labels
+        self.labels = labels.split(',')
         self.apply_effects = apply_effects
     def __len__(self):
         return self.data.shape[0]
@@ -47,12 +48,81 @@ class SampleWrite:
     def __str__(self):
         return '{}  @{}'.format(self.sample.fn, self.t_start)
 
+def triangle_sine_sweep(N):
+
+    a = np.zeros(N)
+
+    # sweep these frequencies, up then back down
+    f0 = 0    * 2*np.pi
+    f1 = 1000 * 2*np.pi
+    phi = 0 # phase
+    f = f0
+    phi_delta = f / SR
+    f_delta = (f1-f0)/N
+
+    for i in range(0, int(N/2)):
+        a[i] = math.sin(phi)
+        phi += phi_delta
+        f += f_delta
+        phi_delta = f / SR
+    for i in range(int(N/2), N):
+        a[i] = math.sin(phi)
+        phi += phi_delta
+        f -= f_delta
+        phi_delta = f / SR
+
+    return a
 
 def synthesize_backgrounds():
-    return []
+    """Create a variety of 10 second background samples: variations with white noise, tone sweeps."""
+
+    backgrounds = []
+    T = 5
+    Ns = SR * T
+
+    noise = np.array([2*random.random()-1.0 for _ in range(Ns)])
+    noise15 = noise * 0.15
+    noise5 = noise * 0.05
+    backgrounds.append(Sample('noise15', noise15, 'bg'))
+    backgrounds.append(Sample('noise5', noise5, 'bg'))
+
+    tswp = triangle_sine_sweep(Ns) * 0.25
+    backgrounds.append(Sample('sweep', tswp, 'bg'))
+
+    backgrounds.append(Sample('sweep+noise', tswp + noise15, 'bg'))
+    backgrounds.append(Sample('sweep-low+noise', tswp * 0.5 + noise5, 'bg'))
+
+    return backgrounds
 
 def generate_with_effects(originals):
-    return []
+    """
+    For each sample, return new versions with various transformations applied:
+    1. different volume levels (lower -- most original samples are already full range)
+    2. add noise
+    3. pitch adjust?
+    4. add reverb, other distortions that a phone mic might add ... ?
+    """
+
+    samples = []
+
+    for s in originals:
+        noise = np.array([2*random.random() - 1.0 for _ in range(len(s))])
+        noise15 = noise * 0.15
+        noise5 = noise * 0.05
+
+        samples.append(Sample(s.fn+'+noise5', s.data + noise5, ','.join(s.labels)))
+        samples.append(Sample(s.fn+'+noise15', s.data + noise15, ','.join(s.labels)))
+
+        samples.append(Sample(s.fn + '+v50', s.data * 0.5, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v20', s.data * 0.2, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v10', s.data * 0.1, ','.join(s.labels)))
+
+        samples.append(Sample(s.fn + '+v50+noise5', s.data * 0.5 + noise5, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v20+noise15', s.data * 0.2 + noise15, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v10+noise5', s.data * 0.1 + noise5, ','.join(s.labels)))
+
+
+    return samples
 
 def load_samples(backgrounds=False):
 
@@ -107,51 +177,20 @@ def make_inverse_weights(v):
 
 def mix_and_record(mix_list, fn_wav, fn_labels, end_at):
     """mix_list needs to be in order of ascending offset"""
-    # outf_labels = open(fn_labels, 'w')
 
-    buf = np.zeros(end_at)
-    for m in mix_list:
-        i = m.t_start
-        j = min(end_at, i + len(m))
-        l = j - i
-        buf[i:j] += m.sample.data[0:l]
+    with open(fn_labels, 'w') as outf_labels:
 
-    scipy.io.wavfile.write(fn_wav, SR, buf)
+        buf = np.zeros(end_at)
+        for m in mix_list:
+            i = m.t_start
+            j = min(end_at, i + len(m))
+            l = j - i
+            buf[i:j] += m.sample.data[0:l]
+            print(m)
+            if 'bg' not in m.sample.labels:
+                outf_labels.write('{}:{}\n'.format(i, ','.join(m.sample.labels)))
 
-
-    # BS=4096
-    # buf = np.zeros(BS)
-    #
-    # m0 = 0  # index in mix_list of first SampleWrite that isn't completely written out yet
-    # i = 0  # current offset pointer
-    # while i < end_at:
-    #     j = min(i + BS, end_at) # so range for this write is i to j
-    #     for m in range(m0, len(mix_list)):
-    #         sw = mix_list[m]
-    #         if sw.offset_written >= len(sw.sample): # then we're done writing this sw
-    #             m0 += 1
-    #             continue
-    #         if sw.t_start >= j: # then this and rest won't be used yet
-    #             break
-    #
-    #         # sw will go into this buffer ... find out where and how much of it
-    #         # from/to offsets in buf
-    #         buf_offset = sw.t_start - i
-    #         n = min(BS - buf_offset, len(sw.sample)) # number of samples to write
-    #         buf_offset_to = buf_offset + n
-    #
-    #         # from/to offsets in sw.sample.data
-    #         smp_offset = sw.offset_written
-    #         smp_offset_to = smp_offset + n
-    #         buf[buf_offset:buf_offset_to] += sw.sample.data[smp_offset:smp_offset_to]
-    #
-    #         sw.offset_written += n
-    #
-    #     #
-    #     i += 1
-    #
-    # outf_labels.close()
-    # outf_wav.close()
+        scipy.io.wavfile.write(fn_wav, SR, buf)
 
 
 def main():
@@ -211,3 +250,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # SR=8000
+    # import matplotlib.pyplot as plt
+    # a = triangle_sine_sweep(SR*100)
+    # plt.plot(a)
+    # plt.show()
+
