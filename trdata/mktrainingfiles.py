@@ -94,6 +94,24 @@ def synthesize_backgrounds():
 
     return backgrounds
 
+def noisyspike(z1=10):
+    sw = random.randint(10, 40)
+    d = [0.] * z1
+    d.extend( [.5] * 2 )
+    d.extend( [-.5] * 2 )
+    d.extend( [.99] * sw )
+    d.extend( [-.99] * sw )
+    d.extend( [.5] * int(sw/4) )
+    d.extend( [-.5] * int(sw/4) )
+    d.extend( [.25] * 5 )
+    d.extend( [-.25] * 5 )
+    d.extend( [.1] * 10 )
+    d.extend( [-.1] * 10 )
+    d.extend( [0] * (4096-len(d)) )
+    d = list(map(lambda x: x + (random.random() - 0.5)/random.randint(5,25), d))
+    return np.asarray(d).astype('float32')
+
+
 def generate_with_effects(originals):
     """
     For each sample, return new versions with various transformations applied:
@@ -121,6 +139,8 @@ def generate_with_effects(originals):
         samples.append(Sample(s.fn + '+v20+noise15', s.data * 0.2 + noise15, ','.join(s.labels)))
         samples.append(Sample(s.fn + '+v10+noise5', s.data * 0.1 + noise5, ','.join(s.labels)))
 
+        samples.append(Sample(s.fn + '+vR', s.data * random.random(), ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+vR2', s.data * random.random() * 2, ','.join(s.labels)))
 
     return samples
 

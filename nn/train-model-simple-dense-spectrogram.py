@@ -1,26 +1,16 @@
-#!/usr/bin/python3 -W ignore
+#!/usr/bin/python3
 
-# #!/usr/local/bin/python3
+import random
+import glob
 
-import tensorflow as tf
-from tensorflow import keras
-
-import scipy
-import scipy.io.wavfile
-from scipy.fftpack import fft
 import numpy as np
-
+import tensorflow as tf
 from tensorflow.keras.models import Model, load_model, Sequential
 from tensorflow.keras.layers import Dense, Activation, Dropout, Input, Masking, Conv1D, Flatten, BatchNormalization
 from tensorflow.keras.regularizers import l2, l1
 from tensorflow.keras.callbacks import TensorBoard
 
-import sys
-import random
-import glob
-
-
-import utils as u
+from dsp import utils as u
 
 
 # load all wav files from ./neg and ./pos
@@ -74,79 +64,83 @@ def load_data(pct_train=0.9, max_files=None):
 
 
 
-#########################################################################
+def main():
 
-X_train, Y_train, X_test, Y_test = load_data(max_files=5000)
+    X_train, Y_train, X_test, Y_test = load_data(max_files=5000)
 
-print(X_train.shape)
-print(Y_train.shape)
-print('')
-#print(Y_train)
+    print(X_train.shape)
+    print(Y_train.shape)
+    print('')
+    #print(Y_train)
 
-u.validate_data(X_train)
+    u.validate_data(X_train)
 
-model = Sequential()
+    model = Sequential()
 
-model.add(BatchNormalization())
+    model.add(BatchNormalization())
 
-model.add(Conv1D(filters=64,
-                 kernel_size=7,
-                 strides=2,
-                 activation=tf.nn.relu,
-                 #kernel_initializer='uniform',
-                 #activity_regularizer=l2(.01),
-                 #input_shape=(X_train.shape[1:])
-                 ))
+    model.add(Conv1D(filters=64,
+                     kernel_size=7,
+                     strides=2,
+                     activation=tf.nn.relu,
+                     #kernel_initializer='uniform',
+                     #activity_regularizer=l2(.01),
+                     #input_shape=(X_train.shape[1:])
+                     ))
 
-model.add(BatchNormalization())
-model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Flatten())
 
-model.add(Dense(64, activation=tf.nn.relu))
-model.add(BatchNormalization())
+    model.add(Dense(64, activation=tf.nn.relu))
+    model.add(BatchNormalization())
 
-model.add(Dropout(0.4))
+    model.add(Dropout(0.4))
 
-model.add(Dense(16, activation=tf.nn.relu,
-                    #kernel_initializer='uniform',
-                    #kernel_regularizer=l2(0.01),
-                    #activity_regularizer=l2(0.01)
-                    ))
-model.add(BatchNormalization())
+    model.add(Dense(16, activation=tf.nn.relu,
+                        #kernel_initializer='uniform',
+                        #kernel_regularizer=l2(0.01),
+                        #activity_regularizer=l2(0.01)
+                        ))
+    model.add(BatchNormalization())
 
-model.add(Dropout(0.4))
+    model.add(Dropout(0.4))
 
-model.add(Dense(1, activation=tf.nn.sigmoid))
+    model.add(Dense(1, activation=tf.nn.sigmoid))
 
-#optimizer = tf.keras.optimzizers.AdamOptimizer()
-optimizer = tf.keras.optimizers.RMSprop(lr=0.01)
+    #optimizer = tf.keras.optimzizers.AdamOptimizer()
+    optimizer = tf.keras.optimizers.RMSprop(lr=0.01)
 
-model.compile(optimizer=optimizer,
-              #loss='mse',
-              loss='binary_crossentropy',
-              metrics=['accuracy']) # XXX because of class imbalance, try different metric
-
-
+    model.compile(optimizer=optimizer,
+                  #loss='mse',
+                  loss='binary_crossentropy',
+                  metrics=['accuracy']) # XXX because of class imbalance, try different metric
 
 
-#tbCallBack = TensorBoard(log_dir='./tensorboard', histogram_freq=0, write_graph=True, write_images=True)
-
-# This builds the model for the first time:
-#model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
-#model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
-model.fit(X_train, Y_train, epochs=10)
-
-#model.summary()
-#all_weights = []
-#for layer in model.layers:
-#   w = layer.get_weights()
-#   all_weights.append(w)
-#all_weights = np.array(all_weights)
-#print(all_weights)
 
 
-test_loss, test_acc = model.evaluate(X_test, Y_test)
+    #tbCallBack = TensorBoard(log_dir='./tensorboard', histogram_freq=0, write_graph=True, write_images=True)
 
-print('Test accuracy:', test_acc)
+    # This builds the model for the first time:
+    #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
+    #model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
+    model.fit(X_train, Y_train, epochs=10)
 
-tf.keras.models.save_model(model, 'train-model-simple-dense-spectrogram.hdf5')
+    #model.summary()
+    #all_weights = []
+    #for layer in model.layers:
+    #   w = layer.get_weights()
+    #   all_weights.append(w)
+    #all_weights = np.array(all_weights)
+    #print(all_weights)
 
+
+    test_loss, test_acc = model.evaluate(X_test, Y_test)
+
+    print('Test accuracy:', test_acc)
+
+    tf.keras.models.save_model(model, 'train-model-simple-dense-spectrogram.hdf5')
+
+
+
+if __name__ == '__main__':
+    main()
