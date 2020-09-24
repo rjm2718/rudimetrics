@@ -106,6 +106,9 @@ def load_wav(fn, sample_rate_conv_func=None):
 
         sr = w.rate
 
+    if data is None or len(data)==0:
+        print('warning: load_wav has no data loaded for', fn)
+
     mx = np.abs(data).max()
     if mx < 0.000000001:
         print("warn: all zeros in", fn)
@@ -114,6 +117,8 @@ def load_wav(fn, sample_rate_conv_func=None):
 
     if sample_rate_conv_func:
         data = sample_rate_conv_func(sr, data, fn)
+        if data is None:
+            print('warning: sample_rate_conv_func returned nothing')
 
     return data
 

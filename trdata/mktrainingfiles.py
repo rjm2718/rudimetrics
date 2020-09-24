@@ -1,4 +1,13 @@
 #!/usr/bin/python3
+
+"""
+Program to generate training/test data.  Query sqlite3 registry of samples and backgrounds, load files from
+repo, apply various transformations to samples, then mix a random combination of everything.  Outputs a wav
+file with at least a few samples (positive/negative drum/!drum note examples) per sec on top of random
+backgrounds.  Outputs a labels file with an offset,label pair on each line indicating where the samples are
+in the wave file.
+"""
+
 import math
 import random
 import traceback
@@ -10,22 +19,14 @@ import scipy.io.wavfile
 
 from dsp import utils as u
 
-# inputs: list of labels for positives and negatives, effects to apply, density, length, % samples for training/test
-# output: wav file + labels file,  labels file contains (labels,offset) on each line; file set each for training/test
-
-# sample rate: this should be an option, we will be playing with it later ... or maybe jsut stick with 44.1khz until
-# we need more cpu
-
-# given samples from query to repo:
-#  - convert sample rate and mono as needed
-
 # all paths to sound files are relative to REPO_BASE
-home=os.path.expanduser("~")
+home = os.path.expanduser("~")
 REPO_BASE = os.path.join(home, 'rudimetrics', 'trdata', 'repo')
 REPO_DB = os.path.join(REPO_BASE, 'repo.db')
 
 # globals
 SR = 0  # sample rate
+
 
 class Sample:
     def __init__(self, fn, data, labels=[], apply_effects=False):
@@ -33,45 +34,51 @@ class Sample:
         self.data = data
         self.labels = labels.split(',')
         self.apply_effects = apply_effects
+
     def __len__(self):
         return self.data.shape[0]
+
     def __str__(self):
         return self.fn
+
 
 class SampleWrite:
     def __init__(self, sample, t_start):
         self.sample = sample;
         self.t_start = t_start
         self.offset_written = 0
+
     def __len__(self):
         return len(self.sample)
+
     def __str__(self):
         return '{}  @{}'.format(self.sample.fn, self.t_start)
 
-def triangle_sine_sweep(N):
 
+def triangle_sine_sweep(N):
     a = np.zeros(N)
 
     # sweep these frequencies, up then back down
-    f0 = 0    * 2*np.pi
-    f1 = 1000 * 2*np.pi
-    phi = 0 # phase
+    f0 = 0 * 2 * np.pi
+    f1 = 1000 * 2 * np.pi
+    phi = 0  # phase
     f = f0
     phi_delta = f / SR
-    f_delta = (f1-f0)/N
+    f_delta = (f1 - f0) / N
 
-    for i in range(0, int(N/2)):
+    for i in range(0, int(N / 2)):
         a[i] = math.sin(phi)
         phi += phi_delta
         f += f_delta
         phi_delta = f / SR
-    for i in range(int(N/2), N):
+    for i in range(int(N / 2), N):
         a[i] = math.sin(phi)
         phi += phi_delta
         f -= f_delta
         phi_delta = f / SR
 
     return a
+
 
 def synthesize_backgrounds():
     """Create a variety of 10 second background samples: variations with white noise, tone sweeps."""
@@ -80,7 +87,7 @@ def synthesize_backgrounds():
     T = 5
     Ns = SR * T
 
-    noise = np.array([2*random.random()-1.0 for _ in range(Ns)])
+    noise = np.array([2 * random.random() - 1.0 for _ in range(Ns)])
     noise15 = noise * 0.15
     noise5 = noise * 0.05
     backgrounds.append(Sample('noise15', noise15, 'bg'))
@@ -94,21 +101,22 @@ def synthesize_backgrounds():
 
     return backgrounds
 
+
 def noisyspike(z1=10):
     sw = random.randint(10, 40)
     d = [0.] * z1
-    d.extend( [.5] * 2 )
-    d.extend( [-.5] * 2 )
-    d.extend( [.99] * sw )
-    d.extend( [-.99] * sw )
-    d.extend( [.5] * int(sw/4) )
-    d.extend( [-.5] * int(sw/4) )
-    d.extend( [.25] * 5 )
-    d.extend( [-.25] * 5 )
-    d.extend( [.1] * 10 )
-    d.extend( [-.1] * 10 )
-    d.extend( [0] * (4096-len(d)) )
-    d = list(map(lambda x: x + (random.random() - 0.5)/random.randint(5,25), d))
+    d.extend([.5] * 2)
+    d.extend([-.5] * 2)
+    d.extend([.99] * sw)
+    d.extend([-.99] * sw)
+    d.extend([.5] * int(sw / 4))
+    d.extend([-.5] * int(sw / 4))
+    d.extend([.25] * 5)
+    d.extend([-.25] * 5)
+    d.extend([.1] * 10)
+    d.extend([-.1] * 10)
+    d.extend([0] * (4096 - len(d)))
+    d = list(map(lambda x: x + (random.random() - 0.5) / random.randint(5, 25), d))
     return np.asarray(d).astype('float32')
 
 
@@ -124,12 +132,12 @@ def generate_with_effects(originals):
     samples = []
 
     for s in originals:
-        noise = np.array([2*random.random() - 1.0 for _ in range(len(s))])
+        noise = np.array([2 * random.random() - 1.0 for _ in range(len(s))])
         noise15 = noise * 0.15
         noise5 = noise * 0.05
 
-        samples.append(Sample(s.fn+'+noise5', s.data + noise5, ','.join(s.labels)))
-        samples.append(Sample(s.fn+'+noise15', s.data + noise15, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+noise5', s.data + noise5, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+noise15', s.data + noise15, ','.join(s.labels)))
 
         samples.append(Sample(s.fn + '+v50', s.data * 0.5, ','.join(s.labels)))
         samples.append(Sample(s.fn + '+v20', s.data * 0.2, ','.join(s.labels)))
@@ -144,15 +152,15 @@ def generate_with_effects(originals):
 
     return samples
 
-def load_samples(backgrounds=False):
 
+def load_samples(backgrounds=False):
     def resample_to_sr(sr_from, data, fn):
         return u.resample(sr_from, SR, data, fn)
 
-    conn = sqlite3.connect(REPO_DB) # default autocommit ... apparently not
+    conn = sqlite3.connect(REPO_DB)  # default autocommit ... apparently not
 
     # load backgrounds ... no effects applied
-    samples = [] # { fn,
+    samples = []  # { fn,
     table_name = 'samples' if not backgrounds else 'backgrounds'
 
     c = conn.cursor()
@@ -181,6 +189,7 @@ def load_samples(backgrounds=False):
 
     return samples
 
+
 def make_inverse_weights(v):
     """given list of values, return list of weights that sum to 1, where each value is
     mapped to a weight in inverse proportion.  Small values are adjusted to be no less than
@@ -188,7 +197,7 @@ def make_inverse_weights(v):
     v = list(v)
     avg = sum(v) / len(v)
     weights = map(lambda w: max(w, avg / 5), v)
-    weights = map(lambda w: avg / w, weights) # inverse
+    weights = map(lambda w: avg / w, weights)  # inverse
     weights = list(weights)
     ws = sum(weights)
     weights = map(lambda w: w / ws, weights)  # make it sum to 1
@@ -214,13 +223,13 @@ def mix_and_record(mix_list, fn_wav, fn_labels, end_at):
 
 
 def main():
-
     global SR
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-r", "--sample-rate", dest="SR", help="sample rate", type=int, default=44100)
     ap.add_argument("-s", "--seconds", dest="DS", help="duration in seconds", type=int, default=300)
-    ap.add_argument("-o", "--output", dest="OUTPATH", help="output filename without extension, .wav and .labels will be created", type=str, required=True)
+    ap.add_argument("-o", "--output", dest="OUTPATH",
+                    help="output filename without extension, .wav and .labels will be created", type=str, required=True)
     args = ap.parse_args()
 
     SR = args.SR
@@ -257,16 +266,17 @@ def main():
 
         rs = int(random.gauss(avgSpacingSamples, avgDistSamples))
         if rs < minSampSpacing:
-            rs = random.randint(minSampSpacing, int(avgSpacingSamples/10))
+            rs = random.randint(minSampSpacing, int(avgSpacingSamples / 10))
         pos += rs
 
     mix_list.sort(key=lambda s: s.t_start)
 
-    print('average notes/sec will be ', len(mix_list)/args.DS)
+    print('average notes/sec will be ', len(mix_list) / args.DS)
 
     mix_and_record(mix_list, args.OUTPATH + '.wav', args.OUTPATH + '.labels', end)
 
     print('done!')
+
 
 if __name__ == '__main__':
     main()
@@ -275,4 +285,3 @@ if __name__ == '__main__':
     # a = triangle_sine_sweep(SR*100)
     # plt.plot(a)
     # plt.show()
-

@@ -1,20 +1,13 @@
-#!/usr/bin/python3 -W ignore
-
-##!/usr/local/bin/python3
-
+#!/usr/bin/python3
 import sys
 
-import scipy
-import scipy.io.wavfile
 import numpy as np
-
 from tensorflow.keras.models import load_model
-
-import utils as u
-
 import matplotlib.pyplot as plt
 
-#########################################################################
+from dsp import utils as u
+
+
 
 print('')
 if len(sys.argv) < 3:
@@ -88,21 +81,3 @@ plt.show()
 #plt.subplot(412)
 #plt.imshow(binsT, cmap='hot', interpolation='nearest', aspect='auto')
 
-
-
-
-
-
-
-
-# then, train on more samples with background mixed in, varying volume levels
-
-# ok, now take this model and see how it does to pinpoint notes in pad-loud-soft.wav
-
-# then, see how we do with same & different notes with partial/concurrent overlap
-
-# add in percussive onset detection to improve detection/localization of notes.
-# adjust optimizer to reduce false negatives.
-
-# filtering has got to be in here somewhere ... train NN on spectrogram ...
-# get on with estimating cpu load at run-time
