@@ -9,7 +9,7 @@ import wavio
 
 
 def spectrum(x):
-    """returns real valued fft of x (array like), discarding mirrored half of spectrum"""
+    """returns real valued fft of x (array like), discarding mirrored half of spectrum. Hann window applied."""
 
     M = len(x)
     # make window, element multiply
@@ -108,12 +108,16 @@ def load_wav(fn, sample_rate_conv_func=None):
 
     if data is None or len(data)==0:
         print('warning: load_wav has no data loaded for', fn)
+        return data
 
     mx = np.abs(data).max()
     if mx < 0.000000001:
         print("warn: all zeros in", fn)
 
     data = convert_to_mono(data)
+
+    if np.isnan(np.max(data)):
+        raise Exception("np.nan found in data")
 
     if sample_rate_conv_func:
         data = sample_rate_conv_func(sr, data, fn)
@@ -139,10 +143,3 @@ def convert_to_mono(data):
 
     data = data[..., 0]
     return np.divide(data, nc)
-
-
-# TODO sanity check data
-def validate_data(data):
-    if np.isnan(np.max(data)):
-        print("np.nan found in data ... aborting!")
-        sys.exit()

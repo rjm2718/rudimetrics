@@ -22,11 +22,17 @@ from dsp import utils as u
 # globals
 SR = 44100  # sample rate
 SPTGRM_FREQ_BINS = 512  # half the window size when creating spectrogram,
-SPTGRM_STRIDE = 128    # spectrogram stride, approx
+SPTGRM_STRIDE = 64    # spectrogram stride, approx
 SPTGRM_SAMPLEN = 16384  # spectrogram is created from this length of sample, 370ms in this case
+
 
 class Sample:
     def __init__(self, data, offset, labels):
+        """
+        :param data: 1-chan audio sample, len SPTGRM_SAMPLEN
+        :param offset: original location in wav file (not used)
+        :param labels: list of (string) labels
+        """
         self.data = data
         self.offset = offset
         self.labels = labels
@@ -35,7 +41,7 @@ class Sample:
     def __str__(self):
         return '{} @ {}'.format(self.labels, self.offset)
 
-def extract_samples(fn_wav, fn_labels, class_labels):
+def extract_samples(fn_wav, fn_labels):
 
     def check_sr(sr, data, _):
         if sr != SR: raise Exception('sample rate %d of wave file != %d' % (sr, SR))
@@ -50,8 +56,8 @@ def extract_samples(fn_wav, fn_labels, class_labels):
     for l in open(fn_labels):
         (offset, labels) = l.strip().split(':')
         offset = int(offset)
-        labels = list(filter(lambda l: l in class_labels, labels.split(',')))
-        samples[offset] = Sample(wd[offset:offset+SPTGRM_SAMPLEN], offset, labels)
+        if offset+SPTGRM_SAMPLEN < len(wd):
+            samples[offset] = Sample(wd[offset:offset+SPTGRM_SAMPLEN], offset, labels.split(','))
     ns = len(samples)
 
     # given offsets of Samples, find points in between (but not too close) to create more (negative) Samples
@@ -71,55 +77,64 @@ def extract_samples(fn_wav, fn_labels, class_labels):
             ns2 += 1
     print('{} samples plus {} new ones from background space'.format(ns, ns2))
 
-    return samples.values()
+    return list(samples.values())
 
-def load_data(fn_wav, fn_labels, class_labels, pct_train=0.9):
+
+def labels2vec(labels, labels_map):
+    """
+    # multi-label classifier: labels is a list length N (number of possible labels), each position 1 or 0
+    :param labels: list of string labels
+    :param labels_map: string to position
+    :return: label vector
+    """
+    v = [0] * len(labels_map)
+    for l in labels:
+        if l in labels_map:
+            i = labels_map[l]
+            v[i] = 1
+    return v
+
+
+def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
     """
     Read input wav file, make spectrograms, attach labels.
 
     :param fn_wav: filename of wav file
     :param fn_labels: filename containing labels, each line offset:labels (labels comma separated)
-    :param class_labels: list of labels to use; any other label from input file will be assigned neg/0
+    :param labels_map: list of labels to use; any other label from input file will be assigned neg/0
     :param pct_train: fraction of input to be used during test
     :return: numpy array of training data X, training labels Y, test data X, test labels Y
     """
 
-    # each element in X_train is shape (121,129) - time,freq
+    # each element in X_train is shape (249,257) - time,freq
 
     X_train = []
     Y_train = []
     X_test = []
     Y_test = []
 
-    extract_samples(fn_wav, fn_labels, class_labels)
-    sys.exit(0)
+    samples = extract_samples(fn_wav, fn_labels)
+    random.shuffle(samples)
 
-    it_neg = int(pct_train * len(fl_neg))
-    it_pos = int(pct_train * len(fl_pos))
+    samples_train = samples[0:int(pct_train * len(samples))]
+    for s in samples_train:
+        d = u.spectrogram(s.data, SPTGRM_FREQ_BINS, SPTGRM_STRIDE)
+        l = labels2vec(s.labels, labels_map)
+        X_train.append(d)
+        Y_train.append(np.array(l))
 
-    # insert pos/neg value, will separate into X/Y arrays later
-    def s2x(X, fl, v):
-        for l in map(u.load_spectrogram, fl):
-            l = np.insert(l, 0, v, axis=0)
-            X.append(l)
+    samples_test = samples[int(pct_train * len(samples)):]
+    for s in samples_test:
+        d = u.spectrogram(s.data, SPTGRM_FREQ_BINS, SPTGRM_STRIDE)
+        l = labels2vec(s.labels, labels_map)
+        X_test.append(d)
+        Y_test.append(np.array(l))
 
-    s2x(X_train, fl_neg[0:it_neg], 0)
-    s2x(X_train, fl_pos[0:it_pos], 1)
-    X_train = np.asarray(X_train)
-    np.random.shuffle(X_train)
-    Y_train = X_train[...,0,0].astype('int32')
-    X_train = X_train[...,1:,:].astype('float32')
-    #print(X_train.shape)
-    #print(Y_train.shape)
-
-    s2x(X_test, fl_neg[it_neg:], 0)
-    s2x(X_test, fl_pos[it_pos:], 1)
-    X_test = np.asarray(X_test)
-    np.random.shuffle(X_test)
-    Y_test = X_test[...,0,0].astype('int32')
-    X_test = X_test[...,1:,:].astype('float32')
-
-    return X_train, Y_train, X_test, Y_test
+    X_train = np.array(X_train, copy=False)
+    Y_train = np.array(Y_train, copy=False)
+    X_test = np.array(X_test, copy=False)
+    Y_test = np.array(Y_test, copy=False)
+    return X_train[..., np.newaxis], Y_train, X_test[..., np.newaxis], Y_test
 
 
 
@@ -135,36 +150,40 @@ def main():
 
     args = ap.parse_args()
     SR = args.SR
-    labels = args.LABELS.split(',')
 
-    X_train, Y_train, X_test, Y_test = load_data(args.WAVFILE, args.LABELSFILE, labels)
+    labels_map = {}  # map label (in model) to integer (will be position in multi-label vector of 1s and 0s)
+    le = 0
+    for l in args.LABELS.split(','):
+        labels_map[l] = le
+        le += 1
+
+    X_train, Y_train, X_test, Y_test = load_data(args.WAVFILE, args.LABELSFILE, labels_map)
 
     print(X_train.shape)
-    print(Y_train.shape)
     print('')
-    #print(Y_train)
 
-    u.validate_data(X_train)
 
-    return
+    # TODO batch size
 
     import tensorflow as tf
     from tensorflow.keras.models import Model, load_model, Sequential
-    from tensorflow.keras.layers import Dense, Activation, Dropout, Input, Masking, Conv1D, Flatten, BatchNormalization
+    from tensorflow.keras.layers import Dense, Activation, Dropout, Input, Masking, Conv1D, Conv2D, Flatten, BatchNormalization
     from tensorflow.keras.regularizers import l2, l1
     from tensorflow.keras.callbacks import TensorBoard
+
+    print('')
 
     model = Sequential()
 
     model.add(BatchNormalization())
 
-    model.add(Conv1D(filters=64,
-                     kernel_size=7,
-                     strides=2,
+    model.add(Conv2D(filters=128,
+                     kernel_size=15,
+                     strides=4,
                      activation=tf.nn.relu,
                      #kernel_initializer='uniform',
                      #activity_regularizer=l2(.01),
-                     #input_shape=(X_train.shape[1:])
+                     input_shape=(X_train.shape)
                      ))
 
     model.add(BatchNormalization())
@@ -173,7 +192,7 @@ def main():
     model.add(Dense(64, activation=tf.nn.relu))
     model.add(BatchNormalization())
 
-    model.add(Dropout(0.4))
+    model.add(Dropout(0.3))
 
     model.add(Dense(16, activation=tf.nn.relu,
                         #kernel_initializer='uniform',
@@ -182,9 +201,9 @@ def main():
                         ))
     model.add(BatchNormalization())
 
-    model.add(Dropout(0.4))
+    model.add(Dropout(0.3))
 
-    model.add(Dense(len(labels), activation=tf.nn.softmax))
+    model.add(Dense(len(labels_map), activation=tf.nn.softmax)) # TODO multi-label
 
     #optimizer = tf.keras.optimzizers.AdamOptimizer()
     optimizer = tf.keras.optimizers.RMSprop(lr=0.01)
@@ -194,17 +213,17 @@ def main():
                   loss='binary_crossentropy',
                   metrics=['accuracy']) # XXX because of class imbalance, try different metric
 
-
-
+    print('')
 
     #tbCallBack = TensorBoard(log_dir='./tensorboard', histogram_freq=0, write_graph=True, write_images=True)
 
     # This builds the model for the first time:
     #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
     #model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
-    model.fit(X_train, Y_train, epochs=10)
+    model.fit(X_train, Y_train, epochs=25)
 
-    #model.summary()
+    model.summary()
+
     #all_weights = []
     #for layer in model.layers:
     #   w = layer.get_weights()
