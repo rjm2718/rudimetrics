@@ -21,9 +21,9 @@ from dsp import utils as u
 
 # globals
 SR = 44100  # sample rate
-SPTGRM_FREQ_BINS = 512  # half the window size when creating spectrogram,
-SPTGRM_STRIDE = 64    # spectrogram stride, approx
-SPTGRM_SAMPLEN = 16384  # spectrogram is created from this length of sample, 370ms in this case
+SPTGRM_FREQ_BINS = 512  # will be half this
+SPTGRM_STRIDE = 128    # spectrogram stride, approx
+SPTGRM_SAMPLEN = 32768  # spectrogram is created from this length of sample, 740ms in this case
 
 
 class Sample:
@@ -94,6 +94,12 @@ def labels2vec(labels, labels_map):
             v[i] = 1
     return v
 
+def vec2labels(lv, labels_map):
+    ls = []
+    for l,i in labels_map.items():
+        if lv[i]:
+            ls.append(l)
+    return ls
 
 def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
     """
@@ -107,6 +113,8 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
     """
 
     # each element in X_train is shape (249,257) - time,freq
+
+    train_lcount = {l:0 for l in labels_map.keys()}
 
     X_train = []
     Y_train = []
@@ -122,6 +130,8 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
         l = labels2vec(s.labels, labels_map)
         X_train.append(d)
         Y_train.append(np.array(l))
+        for l in filter(lambda z: z in train_lcount, s.labels):
+            train_lcount[l] += 1
 
     samples_test = samples[int(pct_train * len(samples)):]
     for s in samples_test:
@@ -129,6 +139,11 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
         l = labels2vec(s.labels, labels_map)
         X_test.append(d)
         Y_test.append(np.array(l))
+
+    print('training set sample counts:')
+    for l,c in train_lcount.items():
+        print(l,c)
+    print('')
 
     X_train = np.array(X_train, copy=False)
     Y_train = np.array(Y_train, copy=False)
@@ -159,8 +174,27 @@ def main():
 
     X_train, Y_train, X_test, Y_test = load_data(args.WAVFILE, args.LABELSFILE, labels_map)
 
-    print(X_train.shape)
+    print('shape of X_train:', X_train.shape)
     print('')
+
+    # for each sample in X_test, put into separate arrays by label
+    td_by_label = {}  # label: (x_test, y_test)
+    for i in range(0, X_test.shape[0]):
+        ll = vec2labels(Y_train[i], labels_map)
+        if not ll:
+            ll.append('<none>')
+        for l in ll:
+            x_test, y_test = td_by_label.get(l, ([], []))
+            x_test.append(X_test[i])
+            y_test.append(Y_test[i])
+            td_by_label[l] = (x_test, y_test)
+        if len(ll) > 1:
+            pass # TODO multi-label
+    for l in td_by_label:
+        x_test, y_test = td_by_label[l]
+        td_by_label[l] = (np.array(x_test), np.array(y_test))
+
+
 
 
     # TODO batch size
@@ -172,36 +206,52 @@ def main():
     from tensorflow.keras.callbacks import TensorBoard
 
     print('')
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+
+        except RuntimeError as e:
+            print(e)
 
     model = Sequential()
 
-    model.add(BatchNormalization())
+    model.add(BatchNormalization(fused=False))
 
-    model.add(Conv2D(filters=128,
-                     kernel_size=15,
-                     strides=4,
+    # model.add(Conv2D(filters=128,
+    #                  kernel_size=7,
+    #                  strides=2,
+    #                  activation=tf.nn.relu,
+    #                  #kernel_initializer='uniform',
+    #                  #activity_regularizer=l2(.01),
+    #                  input_shape=(X_train.shape[1:])
+    #                  ))
+    model.add(Conv1D(filters=64,
+                     kernel_size=7,
+                     strides=2,
                      activation=tf.nn.relu,
-                     #kernel_initializer='uniform',
-                     #activity_regularizer=l2(.01),
-                     input_shape=(X_train.shape)
+                     # kernel_initializer='uniform',
+                     # activity_regularizer=l2(.01),
+                     input_shape=(X_train.shape[1:])
                      ))
 
-    model.add(BatchNormalization())
+    model.add(BatchNormalization(fused=False))
     model.add(Flatten())
 
     model.add(Dense(64, activation=tf.nn.relu))
-    model.add(BatchNormalization())
+    model.add(BatchNormalization(fused=False))
 
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.2))
 
     model.add(Dense(16, activation=tf.nn.relu,
                         #kernel_initializer='uniform',
                         #kernel_regularizer=l2(0.01),
                         #activity_regularizer=l2(0.01)
                         ))
-    model.add(BatchNormalization())
+    model.add(BatchNormalization(fused=False))
 
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.2))
 
     model.add(Dense(len(labels_map), activation=tf.nn.softmax)) # TODO multi-label
 
@@ -220,7 +270,7 @@ def main():
     # This builds the model for the first time:
     #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
     #model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
-    model.fit(X_train, Y_train, epochs=25)
+    model.fit(X_train, Y_train, epochs=10)
 
     model.summary()
 
@@ -231,10 +281,11 @@ def main():
     #all_weights = np.array(all_weights)
     #print(all_weights)
 
-
-    test_loss, test_acc = model.evaluate(X_test, Y_test)
-
-    print('Test accuracy:', test_acc)
+    print('\nevaluation by label:')
+    for l in td_by_label:
+        x_test, y_test = td_by_label[l]
+        test_loss, test_acc = model.evaluate(x_test, y_test)
+        print('%10s:  %.3f' % (l, test_acc))
 
     tf.keras.models.save_model(model, 'train-model-simple-dense-spectrogram.hdf5')
 

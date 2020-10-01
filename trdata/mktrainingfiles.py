@@ -255,8 +255,8 @@ def main():
         pos += len(s)
 
     # write samples, with average spacing of 200ms
-    avgSpacingSamples = SR * .2
-    avgDistSamples = SR * .2
+    avgSpacingSamples = SR * .25
+    avgDistSamples = SR * .25
     minSampSpacingSec = 0.005
     minSampSpacing = int(minSampSpacingSec * SR)
     pos = minSampSpacing
@@ -266,7 +266,7 @@ def main():
 
         rs = int(random.gauss(avgSpacingSamples, avgDistSamples))
         if rs < minSampSpacing:
-            rs = random.randint(minSampSpacing, int(avgSpacingSamples / 10))
+            rs = random.randint(minSampSpacing, int(avgSpacingSamples / 5))
         pos += rs
 
     mix_list.sort(key=lambda s: s.t_start)
