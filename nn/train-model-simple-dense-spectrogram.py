@@ -21,8 +21,8 @@ from dsp import utils as u
 
 # globals
 SR = 44100  # sample rate
-SPTGRM_FREQ_BINS = 512  # will be half this
-SPTGRM_STRIDE = 128    # spectrogram stride, approx
+SPTGRM_WINDOW_SIZE = 512  # results in half this many frequency bins
+SPTGRM_STRIDE = 128    # spectrogram stride,  ~ 3ms
 SPTGRM_SAMPLEN = 32768  # spectrogram is created from this length of sample, 740ms in this case
 
 
@@ -126,7 +126,7 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
 
     samples_train = samples[0:int(pct_train * len(samples))]
     for s in samples_train:
-        d = u.spectrogram(s.data, SPTGRM_FREQ_BINS, SPTGRM_STRIDE)
+        d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
         l = labels2vec(s.labels, labels_map)
         X_train.append(d)
         Y_train.append(np.array(l))
@@ -135,7 +135,7 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
 
     samples_test = samples[int(pct_train * len(samples)):]
     for s in samples_test:
-        d = u.spectrogram(s.data, SPTGRM_FREQ_BINS, SPTGRM_STRIDE)
+        d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
         l = labels2vec(s.labels, labels_map)
         X_test.append(d)
         Y_test.append(np.array(l))
@@ -216,6 +216,7 @@ def main():
             print(e)
 
     model = Sequential()
+    model.blah = 'ok'
 
     model.add(BatchNormalization(fused=False))
 
@@ -270,7 +271,7 @@ def main():
     # This builds the model for the first time:
     #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
     #model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
-    model.fit(X_train, Y_train, epochs=10)
+    model.fit(X_train, Y_train, epochs=20)
 
     model.summary()
 
@@ -287,7 +288,7 @@ def main():
         test_loss, test_acc = model.evaluate(x_test, y_test)
         print('%10s:  %.3f' % (l, test_acc))
 
-    tf.keras.models.save_model(model, 'train-model-simple-dense-spectrogram.hdf5')
+    tf.keras.models.save_model(model, 't1.hdf5')
 
 
 

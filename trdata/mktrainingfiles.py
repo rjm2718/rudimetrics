@@ -88,16 +88,16 @@ def synthesize_backgrounds():
     Ns = SR * T
 
     noise = np.array([2 * random.random() - 1.0 for _ in range(Ns)])
-    noise15 = noise * 0.15
-    noise5 = noise * 0.05
-    backgrounds.append(Sample('noise15', noise15, 'bg'))
-    backgrounds.append(Sample('noise5', noise5, 'bg'))
+    noise8 = noise * 0.08
+    noise2 = noise * 0.02
+    backgrounds.append(Sample('noise8', noise8, 'bg'))
+    backgrounds.append(Sample('noise5', noise2, 'bg'))
 
-    tswp = triangle_sine_sweep(Ns) * 0.25
+    tswp = triangle_sine_sweep(Ns) * 0.10
     backgrounds.append(Sample('sweep', tswp, 'bg'))
 
-    backgrounds.append(Sample('sweep+noise', tswp + noise15, 'bg'))
-    backgrounds.append(Sample('sweep-low+noise', tswp * 0.5 + noise5, 'bg'))
+    backgrounds.append(Sample('sweep+noise', tswp + noise8, 'bg'))
+    backgrounds.append(Sample('sweep-low+noise', tswp * 0.5 + noise2, 'bg'))
 
     return backgrounds
 
@@ -132,28 +132,25 @@ def generate_with_effects(originals):
     samples = []
 
     for s in originals:
-        noise = np.array([2 * random.random() - 1.0 for _ in range(len(s))])
-        noise15 = noise * 0.15
-        noise5 = noise * 0.05
+        noise = np.array([2 * random.random() - 1.0 for _ in range(len(s))]) * 0.7
+        noise10 = noise * 0.10
+        noise2 = noise * 0.02
 
-        samples.append(Sample(s.fn + '+noise5', s.data + noise5, ','.join(s.labels)))
-        samples.append(Sample(s.fn + '+noise15', s.data + noise15, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+noise2', s.data + noise2, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+noise10', s.data + noise10, ','.join(s.labels)))
 
         samples.append(Sample(s.fn + '+v50', s.data * 0.5, ','.join(s.labels)))
         samples.append(Sample(s.fn + '+v20', s.data * 0.2, ','.join(s.labels)))
-        samples.append(Sample(s.fn + '+v10', s.data * 0.1, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v2', s.data * 0.1, ','.join(s.labels)))
 
-        samples.append(Sample(s.fn + '+v50+noise5', s.data * 0.5 + noise5, ','.join(s.labels)))
-        samples.append(Sample(s.fn + '+v20+noise15', s.data * 0.2 + noise15, ','.join(s.labels)))
-        samples.append(Sample(s.fn + '+v10+noise5', s.data * 0.1 + noise5, ','.join(s.labels)))
-
-        samples.append(Sample(s.fn + '+vR', s.data * random.random(), ','.join(s.labels)))
-        samples.append(Sample(s.fn + '+vR2', s.data * random.random() * 2, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v50+noise2', s.data * 0.5 + noise2, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v20+noise10', s.data * 0.2 + noise10, ','.join(s.labels)))
+        samples.append(Sample(s.fn + '+v2+noise2', s.data * 0.1 + noise2, ','.join(s.labels)))
 
     return samples
 
 
-def load_samples(backgrounds=False):
+def load_samples(backgrounds=False, label_filter=None):
     def resample_to_sr(sr_from, data, fn):
         return u.resample(sr_from, SR, data, fn)
 
@@ -169,6 +166,8 @@ def load_samples(backgrounds=False):
         fn = row[0]
         labels = row[1]
         effects = row[2]
+        if label_filter and not label_filter(labels):
+            continue
         try:
             data = u.load_wav(fn, resample_to_sr)
             if data is not None:
@@ -215,7 +214,7 @@ def mix_and_record(mix_list, fn_wav, fn_labels, end_at):
             j = min(end_at, i + len(m))
             l = j - i
             buf[i:j] += m.sample.data[0:l]
-            print(m)
+            #print(m)
             if 'bg' not in m.sample.labels:
                 outf_labels.write('{}:{}\n'.format(i, ','.join(m.sample.labels)))
 
@@ -228,6 +227,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("-r", "--sample-rate", dest="SR", help="sample rate", type=int, default=44100)
     ap.add_argument("-s", "--seconds", dest="DS", help="duration in seconds", type=int, default=300)
+    ap.add_argument("-l", "--labels", dest="LABELS", help="comma-sep list of labels to include", type=str, required=False)
     ap.add_argument("-o", "--output", dest="OUTPATH",
                     help="output filename without extension, .wav and .labels will be created", type=str, required=True)
     args = ap.parse_args()
@@ -235,7 +235,16 @@ def main():
     SR = args.SR
     end = args.DS * SR
 
-    samples = load_samples()
+    lbl_filt = None
+    if args.LABELS:
+        inclbs = set(args.LABELS.split(','))
+        def lbl_filt(labels_str):
+            for l in labels_str.split(','):
+                if l in inclbs:
+                    return True
+            return False
+
+    samples = load_samples(label_filter=lbl_filt)
     generated_samples = generate_with_effects(filter(lambda s: s.apply_effects, samples))
     samples.extend(generated_samples)
     smp_weights = make_inverse_weights(map(len, samples))
@@ -255,8 +264,8 @@ def main():
         pos += len(s)
 
     # write samples, with average spacing of 200ms
-    avgSpacingSamples = SR * .25
-    avgDistSamples = SR * .25
+    avgSpacingSamples = SR * .55
+    avgDistSamples = SR * .35
     minSampSpacingSec = 0.005
     minSampSpacing = int(minSampSpacingSec * SR)
     pos = minSampSpacing
