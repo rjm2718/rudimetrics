@@ -11,15 +11,17 @@ convolutional or simple dense networks will work best).
 
 
 """
-import argparse
-import sys
-import random
+import os
+import sys, argparse, random, json
+import time
 
 import numpy as np
 
 from dsp import utils as u
 
 # globals
+BATCH_SIZE = 128
+TRAIN_EPOCHS = 40
 SR = 44100  # sample rate
 SPTGRM_WINDOW_SIZE = 512  # results in half this many frequency bins
 SPTGRM_STRIDE = 128    # spectrogram stride,  ~ 3ms
@@ -36,6 +38,34 @@ class Sample:
         self.data = data
         self.offset = offset
         self.labels = labels
+
+    def getFeatureVector(self, labels_map):
+        """Use labels_map to create vector of 1s corresponding to the labels.  If there is no mapping,
+        then lookup None label in map (which will be position 0 in vector) to set.
+        """
+        pos_ex = False
+        v = [0] * len(labels_map)
+        for l in self.labels:
+            if l in labels_map:
+                i = labels_map[l]
+                v[i] = 1
+                pos_ex = True
+
+        if not pos_ex:
+            v[0] = 1  # negative example, null class
+
+        return v
+
+    def getLabels(self, labels_map=None):
+        """return list of labels, the ones set with this object, or filter through labels_map.  If there is
+        no label to return (neg example), returns [None]"""
+        ll = self.labels
+        if labels_map:
+            ll = list(filter(lambda l:l in labels_map, self.labels))
+        if ll:
+            return ll
+        return [None]
+
     def __len__(self):
         return len(self.data)
     def __str__(self):
@@ -45,6 +75,7 @@ def extract_samples(fn_wav, fn_labels):
 
     def check_sr(sr, data, _):
         if sr != SR: raise Exception('sample rate %d of wave file != %d' % (sr, SR))
+        # do a conversion?
         return data
     wd = u.load_wav(fn_wav, check_sr)
     print('loaded wav file, shape=', wd.shape)
@@ -80,21 +111,8 @@ def extract_samples(fn_wav, fn_labels):
     return list(samples.values())
 
 
-def labels2vec(labels, labels_map):
-    """
-    # multi-label classifier: labels is a list length N (number of possible labels), each position 1 or 0
-    :param labels: list of string labels
-    :param labels_map: string to position
-    :return: label vector
-    """
-    v = [0] * len(labels_map)
-    for l in labels:
-        if l in labels_map:
-            i = labels_map[l]
-            v[i] = 1
-    return v
-
 def vec2labels(lv, labels_map):
+    """returns list of string labels.  list may be [None] if vector is for a negative example"""
     ls = []
     for l,i in labels_map.items():
         if lv[i]:
@@ -127,18 +145,19 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
     samples_train = samples[0:int(pct_train * len(samples))]
     for s in samples_train:
         d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
-        l = labels2vec(s.labels, labels_map)
+        y = s.getFeatureVector(labels_map)
         X_train.append(d)
-        Y_train.append(np.array(l))
-        for l in filter(lambda z: z in train_lcount, s.labels):
+        Y_train.append(np.array(y))
+
+        for l in s.getLabels(labels_map):
             train_lcount[l] += 1
 
     samples_test = samples[int(pct_train * len(samples)):]
     for s in samples_test:
         d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
-        l = labels2vec(s.labels, labels_map)
+        y = s.getFeatureVector(labels_map)
         X_test.append(d)
-        Y_test.append(np.array(l))
+        Y_test.append(np.array(y))
 
     print('training set sample counts:')
     for l,c in train_lcount.items():
@@ -159,20 +178,28 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-r", "--sample-rate", dest="SR", help="sample rate", type=int, default=44100)
-    ap.add_argument("-l", "--labels", dest="LABELS", help="comma-sep list of labels to use in classifier", type=str, required=True)
-    ap.add_argument("WAVFILE", help="input wav file", type=str)
-    ap.add_argument("LABELSFILE", help="input labels file", type=str)
+    ap.add_argument("-l", "--labels", dest="labels", help="comma-sep list of labels to use in classifier", type=str, required=True)
+    ap.add_argument("-o", "--model-savefile", dest="modelSaveFile",
+                    help="if specified, save trained model in dir with this name, tf SavedModel format, .cfg will be added with metadata", type=str)
+    ap.add_argument("inputname", help="input base name (.wav/.labels expected)", type=str)
 
     args = ap.parse_args()
     SR = args.SR
 
-    labels_map = {}  # map label (in model) to integer (will be position in multi-label vector of 1s and 0s)
-    le = 0
-    for l in args.LABELS.split(','):
+    t0 = time.time()
+
+    # map label (in model) to integer position in multi-label prediction/label vectors
+    labels_map = { None: 0 } # 0 position output is for the null/negative class
+    le = 1
+    for l in args.labels.split(','):
         labels_map[l] = le
         le += 1
+    print(labels_map)
 
-    X_train, Y_train, X_test, Y_test = load_data(args.WAVFILE, args.LABELSFILE, labels_map)
+    fn_wav = args.inputname + '.wav'
+    fn_lbl = args.inputname + '.labels'
+
+    X_train, Y_train, X_test, Y_test = load_data(fn_wav, fn_lbl, labels_map)
 
     print('shape of X_train:', X_train.shape)
     print('')
@@ -181,8 +208,6 @@ def main():
     td_by_label = {}  # label: (x_test, y_test)
     for i in range(0, X_test.shape[0]):
         ll = vec2labels(Y_train[i], labels_map)
-        if not ll:
-            ll.append('<none>')
         for l in ll:
             x_test, y_test = td_by_label.get(l, ([], []))
             x_test.append(X_test[i])
@@ -194,10 +219,10 @@ def main():
         x_test, y_test = td_by_label[l]
         td_by_label[l] = (np.array(x_test), np.array(y_test))
 
+    t1 = time.time()
 
 
-
-    # TODO batch size
+    # TODO batch size, tf DataSet since things get huge quickly here with the spectrograms
 
     import tensorflow as tf
     from tensorflow.keras.models import Model, load_model, Sequential
@@ -205,18 +230,20 @@ def main():
     from tensorflow.keras.regularizers import l2, l1
     from tensorflow.keras.callbacks import TensorBoard
 
-    print('')
+    # tf necessary init when using gpu/cuda libs
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
         try:
             for gpu in gpus:
                 tf.config.experimental.set_memory_growth(gpu, True)
-
         except RuntimeError as e:
             print(e)
+            sys.exit(-1)
+
+    print('')
+    print('')
 
     model = Sequential()
-    model.blah = 'ok'
 
     model.add(BatchNormalization(fused=False))
 
@@ -254,7 +281,7 @@ def main():
 
     model.add(Dropout(0.2))
 
-    model.add(Dense(len(labels_map), activation=tf.nn.softmax)) # TODO multi-label
+    model.add(Dense(len(labels_map), activation=tf.nn.sigmoid))
 
     #optimizer = tf.keras.optimzizers.AdamOptimizer()
     optimizer = tf.keras.optimizers.RMSprop(lr=0.01)
@@ -265,14 +292,17 @@ def main():
                   metrics=['accuracy']) # XXX because of class imbalance, try different metric
 
     print('')
+    t2 = time.time()
+
 
     #tbCallBack = TensorBoard(log_dir='./tensorboard', histogram_freq=0, write_graph=True, write_images=True)
 
-    # This builds the model for the first time:
+    # This builds the model for the first time
     #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
-    #model.fit(X_train, Y_train, epochs=10, steps_per_epoch=20)
-    model.fit(X_train, Y_train, epochs=20)
+    model.fit(X_train, Y_train, epochs=TRAIN_EPOCHS)
 
+    t3 = time.time()
+    print('training complete\n')
     model.summary()
 
     #all_weights = []
@@ -282,13 +312,36 @@ def main():
     #all_weights = np.array(all_weights)
     #print(all_weights)
 
+
     print('\nevaluation by label:')
+    recLblAcc = {}
     for l in td_by_label:
         x_test, y_test = td_by_label[l]
         test_loss, test_acc = model.evaluate(x_test, y_test)
         print('%10s:  %.3f' % (l, test_acc))
+        recLblAcc[l] = { 'loss': test_loss, 'accuracy': test_acc }
 
-    tf.keras.models.save_model(model, 't1.hdf5')
+    if args.modelSaveFile:
+        print('')
+        model.save(args.modelSaveFile, overwrite=True)
+        cfg = json.dumps({
+            'train_finish_asctime': time.ctime(t2),
+            'train_finish_ts': t2,
+            'train_duration_sec': int(t3-t2),
+            'label_vector_map': labels_map,
+            'SR': SR,
+            'SPTGRM_WINDOW_SIZE': SPTGRM_WINDOW_SIZE,
+            'SPTGRM_STRIDE': SPTGRM_STRIDE,
+            'SPTGRM_SAMPLEN': SPTGRM_SAMPLEN,
+            'TRAIN_EPOCHS': TRAIN_EPOCHS,
+            'BATCH_SIZE': -1,
+            'testset_results': recLblAcc,
+        }, indent=2)
+        with open(args.modelSaveFile+os.path.sep+'r.cfg.json', 'w') as cw:
+            cw.write(cfg)
+            cw.write('\n')
+
+        print('model saved')
 
 
 
