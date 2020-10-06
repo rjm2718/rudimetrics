@@ -264,7 +264,7 @@ def main():
         pos += len(s)
 
     # write samples, with average spacing of 200ms
-    avgSpacingSamples = SR * .55
+    avgSpacingSamples = SR * .4
     avgDistSamples = SR * .35
     minSampSpacingSec = 0.005
     minSampSpacing = int(minSampSpacingSec * SR)

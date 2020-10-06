@@ -9,6 +9,7 @@ We can experiment with the samples as either/both time domain patterns, or frequ
 convolutional networks, or a time series recurrent network (but each sample is usually very short, so I'm guessing
 convolutional or simple dense networks will work best).
 
+test without GPU:  $ CUDA_VISIBLE_DEVICES=-1 ./train-model-simple-dense-spectrogram.py ...
 
 """
 import os
@@ -20,12 +21,12 @@ import numpy as np
 from dsp import utils as u
 
 # globals
-BATCH_SIZE = 128
-TRAIN_EPOCHS = 40
+BATCH_SIZE = 64
+TRAIN_EPOCHS = 20
 SR = 44100  # sample rate
-SPTGRM_WINDOW_SIZE = 512  # results in half this many frequency bins
+SPTGRM_WINDOW_SIZE = 256  # results in half this many frequency bins
 SPTGRM_STRIDE = 128    # spectrogram stride,  ~ 3ms
-SPTGRM_SAMPLEN = 32768  # spectrogram is created from this length of sample, 740ms in this case
+SPTGRM_SAMPLEN = 16384  # spectrogram is created from this length of sample, 740ms in this case
 
 
 class Sample:
@@ -71,14 +72,7 @@ class Sample:
     def __str__(self):
         return '{} @ {}'.format(self.labels, self.offset)
 
-def extract_samples(fn_wav, fn_labels):
-
-    def check_sr(sr, data, _):
-        if sr != SR: raise Exception('sample rate %d of wave file != %d' % (sr, SR))
-        # do a conversion?
-        return data
-    wd = u.load_wav(fn_wav, check_sr)
-    print('loaded wav file, shape=', wd.shape)
+def extract_samples(wd, fn_labels):
 
     # key is offset, value is Sample
     samples = {}
@@ -139,12 +133,27 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
     X_test = []
     Y_test = []
 
-    samples = extract_samples(fn_wav, fn_labels)
+    def check_sr(sr, data, _):
+        if sr != SR: raise Exception('sample rate %d of wave file != %d' % (sr, SR))
+        # do a conversion?
+        return data
+    wd = u.load_wav(fn_wav, check_sr)
+    print('loaded wav file, shape=', wd.shape)
+
+    samples = extract_samples(wd, fn_labels)
     random.shuffle(samples)
+
+    spectrogram = u.spectrogram(wd, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
+
+    # given an offset, spectrogram slice is offset/SPTGRM_STRIDE to +(SPTGRM_SAMPLEN-SPTGRM_WINDOW_SIZE)/SPTGRM_STRIDE+1
+    # (should work out to offset, offset+127)
+    spectrogram_len = int((SPTGRM_SAMPLEN-SPTGRM_WINDOW_SIZE)/SPTGRM_STRIDE + 1)
 
     samples_train = samples[0:int(pct_train * len(samples))]
     for s in samples_train:
-        d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
+        si0 = int(s.offset/SPTGRM_STRIDE)
+        si1 = si0 + spectrogram_len
+        d = spectrogram[si0:si1]
         y = s.getFeatureVector(labels_map)
         X_train.append(d)
         Y_train.append(np.array(y))
@@ -154,7 +163,9 @@ def load_data(fn_wav, fn_labels, labels_map, pct_train=0.9):
 
     samples_test = samples[int(pct_train * len(samples)):]
     for s in samples_test:
-        d = u.spectrogram(s.data, SPTGRM_WINDOW_SIZE, SPTGRM_STRIDE)
+        si0 = int(s.offset / SPTGRM_STRIDE)
+        si1 = si0 + spectrogram_len
+        d = spectrogram[si0:si1]
         y = s.getFeatureVector(labels_map)
         X_test.append(d)
         Y_test.append(np.array(y))
@@ -219,16 +230,15 @@ def main():
         x_test, y_test = td_by_label[l]
         td_by_label[l] = (np.array(x_test), np.array(y_test))
 
-    t1 = time.time()
 
-
-    # TODO batch size, tf DataSet since things get huge quickly here with the spectrograms
+    # TODO tf DataSet since things get huge quickly here with the spectrograms
 
     import tensorflow as tf
-    from tensorflow.keras.models import Model, load_model, Sequential
+    from tensorflow import keras
+    from tensorflow.keras.models import Model, Sequential
     from tensorflow.keras.layers import Dense, Activation, Dropout, Input, Masking, Conv1D, Conv2D, Flatten, BatchNormalization
-    from tensorflow.keras.regularizers import l2, l1
-    from tensorflow.keras.callbacks import TensorBoard
+    # from tensorflow.keras.regularizers import l2, l1
+    # from tensorflow.keras.callbacks import TensorBoard
 
     # tf necessary init when using gpu/cuda libs
     gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -244,8 +254,8 @@ def main():
     print('')
 
     model = Sequential()
-
-    model.add(BatchNormalization(fused=False))
+    #model.add(Input(shape=X_train.shape, batch_size=BATCH_SIZE))
+    model.add(BatchNormalization(input_shape=(X_train.shape[1:]), fused=False))
 
     # model.add(Conv2D(filters=128,
     #                  kernel_size=7,
@@ -261,8 +271,9 @@ def main():
                      activation=tf.nn.relu,
                      # kernel_initializer='uniform',
                      # activity_regularizer=l2(.01),
-                     input_shape=(X_train.shape[1:])
+
                      ))
+    # maxpooling?
 
     model.add(BatchNormalization(fused=False))
     model.add(Flatten())
@@ -281,16 +292,20 @@ def main():
 
     model.add(Dropout(0.2))
 
-    model.add(Dense(len(labels_map), activation=tf.nn.sigmoid))
+    model.add(Dense(len(labels_map), activation=tf.nn.softmax)) # tf.nn.sigmoid
 
     #optimizer = tf.keras.optimzizers.AdamOptimizer()
     optimizer = tf.keras.optimizers.RMSprop(lr=0.01)
 
     model.compile(optimizer=optimizer,
-                  #loss='mse',
+                  # loss='mse',
                   loss='binary_crossentropy',
-                  metrics=['accuracy']) # XXX because of class imbalance, try different metric
+                  metrics=['accuracy'], # XXX because of class imbalance, try different metric
+                  # loss=keras.losses.SparseCategoricalCrossentropy(),
+                  # metrics=[keras.metrics.SparseCategoricalAccuracy()],
+                  )
 
+    model.summary()
     print('')
     t2 = time.time()
 
@@ -299,11 +314,11 @@ def main():
 
     # This builds the model for the first time
     #model.fit(X_train, Y_train, epochs=2, steps_per_epoch=10, callbacks=[tbCallBack])
-    model.fit(X_train, Y_train, epochs=TRAIN_EPOCHS)
+    model.fit(X_train, Y_train, epochs=TRAIN_EPOCHS, batch_size=BATCH_SIZE)
 
     t3 = time.time()
     print('training complete\n')
-    model.summary()
+
 
     #all_weights = []
     #for layer in model.layers:
@@ -334,7 +349,7 @@ def main():
             'SPTGRM_STRIDE': SPTGRM_STRIDE,
             'SPTGRM_SAMPLEN': SPTGRM_SAMPLEN,
             'TRAIN_EPOCHS': TRAIN_EPOCHS,
-            'BATCH_SIZE': -1,
+            'BATCH_SIZE': BATCH_SIZE,
             'testset_results': recLblAcc,
         }, indent=2)
         with open(args.modelSaveFile+os.path.sep+'r.cfg.json', 'w') as cw:

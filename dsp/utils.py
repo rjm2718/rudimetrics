@@ -19,18 +19,18 @@ def spectrum(x):
 
 
 #
-def spectrogram(s, M=256, spm=32):
-    """ s is sample data, M is window size, spm is stride
-        (4096,) input, returns ((4096-256)/spm, 129) -> (121, 129)
+def spectrogram(data, M=256, stride=32):
+    """ s is sample data, M is fft window size.
+        return spectrogram with output dimensions ((len(data)-M)/stride+1, M/2+1).
         """
 
     i = 0  # starting sample
     bins = []  # energy in freq bins
-    while i <= len(s) - M:
-        c = s[i:i + M]
+    while i <= len(data) - M:
+        c = data[i:i + M]
         Y = spectrum(c)
         bins.append(Y)
-        i += spm
+        i += stride
 
     bins = np.asarray(bins)
     bins = normalize(bins)
