@@ -88,12 +88,12 @@ def synthesize_backgrounds():
     Ns = SR * T
 
     noise = np.array([2 * random.random() - 1.0 for _ in range(Ns)])
-    noise8 = noise * 0.08
-    noise2 = noise * 0.02
+    noise8 = noise * 0.08 * 0.5
+    noise2 = noise * 0.02 * 0.5
     backgrounds.append(Sample('noise8', noise8, 'bg'))
     backgrounds.append(Sample('noise5', noise2, 'bg'))
 
-    tswp = triangle_sine_sweep(Ns) * 0.10
+    tswp = triangle_sine_sweep(Ns) * 0.10 * 0.5
     backgrounds.append(Sample('sweep', tswp, 'bg'))
 
     backgrounds.append(Sample('sweep+noise', tswp + noise8, 'bg'))
@@ -133,8 +133,8 @@ def generate_with_effects(originals):
 
     for s in originals:
         noise = np.array([2 * random.random() - 1.0 for _ in range(len(s))]) * 0.7
-        noise10 = noise * 0.10
-        noise2 = noise * 0.02
+        noise10 = noise * 0.10 * 0.5
+        noise2 = noise * 0.02 * 0.5
 
         samples.append(Sample(s.fn + '+noise2', s.data + noise2, ','.join(s.labels)))
         samples.append(Sample(s.fn + '+noise10', s.data + noise10, ','.join(s.labels)))
@@ -250,6 +250,8 @@ def main():
     smp_weights = make_inverse_weights(map(len, samples))
 
     backgrounds = load_samples(backgrounds=True)
+    for s in backgrounds:
+        s.data = s.data * 0.5
     backgrounds.extend(synthesize_backgrounds())
     bg_weights = make_inverse_weights(map(len, backgrounds))
 
@@ -264,7 +266,7 @@ def main():
         pos += len(s)
 
     # write samples, with average spacing of 200ms
-    avgSpacingSamples = SR * .4
+    avgSpacingSamples = SR * .3
     avgDistSamples = SR * .35
     minSampSpacingSec = 0.005
     minSampSpacing = int(minSampSpacingSec * SR)
